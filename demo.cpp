@@ -8,12 +8,18 @@
 
 enum Events { EVT1, EVT2, EVT3 };
 
+struct printing_cb {
+    static void cb(sfsm::state_id_t from, Events evt, sfsm::state_id_t to) {
+        std::cout << " [" << from << "," << evt << "," << to << "] ";
+    }
+};
+
 int main()
 {
     sfsm::StateMachine<Events,
         sfsm::State<Events, 1,
             sfsm::transition_t<Events, EVT1, 2>,
-            sfsm::transition_t<Events, EVT2, 1>>,
+            sfsm::transition_t<Events, EVT2, 1, printing_cb>>,
         sfsm::State<Events, 2,
             sfsm::transition_t<Events, EVT3, 1>>> machine(1);
     

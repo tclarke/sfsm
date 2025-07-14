@@ -16,10 +16,14 @@ namespace sfsm
 struct invalid_transition : public std::exception {};
 using state_id_t = int;
 
-template<typename EVENT_T, EVENT_T E, state_id_t S>
+template<typename EVENT_T>
+struct null_callback { static void cb(const state_id_t&, const EVENT_T&, const state_id_t&) {} };
+
+template<typename EVENT_T, EVENT_T E, state_id_t S, typename CB=null_callback<EVENT_T>>
 struct transition_t {
     static constexpr EVENT_T event = E;
     static constexpr state_id_t next_state = S;
+    using callback_t = CB;
 };
 
 template<typename EVENT_T, state_id_t ID, typename...TRS>
@@ -33,6 +37,7 @@ struct State<EVENT_T, ID, TR, TRS...> {
     static constexpr state_id_t state_id = ID;
     static state_id_t next(const EVENT_T& evt) {
         if (TR::event == evt) {
+            TR::callback_t::cb(ID, evt, TR::next_state);
             return TR::next_state;
         }
         return State<EVENT_T, ID, TRS...>::next(evt);
